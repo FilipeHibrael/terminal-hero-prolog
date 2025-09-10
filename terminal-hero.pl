@@ -1,74 +1,69 @@
+:- use_module(library(process)). % <- Nova biblioteca
 :- use_module(library(random)).
 :- use_module(library(readutil)).
 
 :- dynamic note/3.
 :- dynamic score/1.
 
-% Início do jogo
+% Início do jogo (simplificado)
 start :-
     retractall(note(_,_,_)),
     retractall(score(_)),
     assertz(score(0)),
     format("~n🎸 Guitar Hero Terminal (Prolog Edition)~n"),
-    format("Use as teclas A S J K para tocar (aperte Enter após cada tecla)~n"),
+    format("Use as teclas A S J K para tocar~n"),
     sleep(1),
     game_loop(0).
 
-% Mapeamento das colunas
-col_index(a, 0).
-col_index(s, 1).
-col_index(j, 2).
-col_index(k, 3).
-
-% Cores ANSI
-color(a, "\033[1;31m").  % Vermelho
-color(s, "\033[1;32m").  % Verde
-color(j, "\033[1;33m").  % Amarelo
-color(k, "\033[1;34m").  % Azul
+% Mapeamento e Cores (sem alterações)
+col_index(a, 0). col_index(s, 1). col_index(j, 2). col_index(k, 3).
+color(a, "\033[1;31m"). color(s, "\033[1;32m").
+color(j, "\033[1;33m"). color(k, "\033[1;34m").
 reset_color("\033[0m").
 
-% Adiciona nota aleatória no topo
 spawn_note :-
     random_member(Key, [a,s,j,k]),
     assertz(note(Key, 0, false)).
 
-% Move as notas para baixo
+% Lógica de movimento e notas perdidas
 move_notes :-
-    findall((Key,Y,_), note(Key,Y,_), Notes),
+    findall((Key,Y,InZone), note(Key,Y,InZone), Notes),
     retractall(note(_,_,_)),
-    forall(member((Key,Y,_), Notes),
+    forall(member((Key,Y,InZone), Notes),
         (
             Y1 is Y + 1,
-            (Y1 >= 8 -> InZone = true ; InZone = false),
-            (Y1 =< 9 -> assertz(note(Key,Y1,InZone)) ; true)
+            ( Y == 9, InZone == true -> update_score(-5) ; true ),
+            (Y1 >= 7 -> NewInZone = true ; NewInZone = false),
+            (Y1 =< 9 -> assertz(note(Key,Y1,NewInZone)) ; true)
         )
     ).
 
-% Leitura da tecla pressionada (precisa apertar Enter)
+% NOVO PREDICADO DE LEITURA
 read_key(Key) :-
-    read_line_to_codes(user_input, Codes),
-    ( Codes = [Code|_] ->
+    Command = '(read -s -n 1 -t 0.05 key && echo -n "$key") || true',
+    process_create(path(bash), ['-c', Command], [stdout(pipe(Out))]),
+    read_stream_to_codes(Out, Codes),
+    close(Out),
+    ( Codes = [Code] ->
         char_code(Key, Code)
-    ; Key = '\n'
+    ;
+        Key = none
     ).
 
-% Lida com a tecla pressionada
+% Lógica de input (sem alterações na última versão)
+handle_input(none) :- !.
 handle_input(Key) :-
     downcase_atom(Key, K),
-    ( member(K, [a,s,j,k]) ->
-        ( once(note(K, Y, true)) ->
-            retract(note(K,Y,true)),
-            update_score(10),
-            format("~n✔️  Acertou! +10 pontos~n")
-        ;
-            update_score(-5),
-            format("~n❌ Errou! -5 pontos~n")
-        )
+    findall(Y, note(K, Y, _), Ys),
+    ( Ys \= [] ->
+        max_list(Ys, MaxY),
+        once(retract(note(K, MaxY, _))),
+        ( MaxY >= 7 -> update_score(10) ; update_score(-2) )
     ;
         true
     ).
 
-% Atualiza o score
+% Lógica de score e game over
 update_score(Delta) :-
     score(S),
     S1 is S + Delta,
@@ -76,20 +71,14 @@ update_score(Delta) :-
     assertz(score(S1)),
     check_game_over(S1).
 
-% Verifica vitória ou derrota
 check_game_over(S) :-
-    ( S >= 100 ->
-        format("~n🎉 Você venceu!~n"),
-        halt
-    ; S =< -10 ->
-        format("~n💀 Game Over!~n"),
-        halt
+    ( S >= 100 -> format("~n🎉 Você venceu!~n"), halt
+    ; S =< -10 -> format("~n💀 Game Over!~n"), halt
     ; true ).
 
-% Limpa a tela
-clear :- write('\e[2J').
+clear :- write('\e[2J\e[H').
 
-% Desenha o jogo
+% Lógica de desenho
 draw_game :-
     score(S),
     format("+---------------------+~n"),
@@ -97,28 +86,20 @@ draw_game :-
     format("|                     |~n"),
     format("|     a   s   j   k   |~n"),
     format("|   ┌───┬───┬───┬───┐ |~n"),
-
     forall(between(0, 9, Y),
-        (
-            format("|   "),
-            draw_row(Y),
-            format(" |~n")
-        )
+        ( format("|   "), draw_row(Y), format(" |~n") )
     ),
-
     format("|   │===│===│===│===│ |~n"),
     format("|   └───┴───┴───┴───┘ |~n"),
     format("+---------------------+~n").
 
-% Desenha uma linha Y
 draw_row(Y) :-
     forall(between(0, 3, Col),
         (
-            ( col_index(Key, Col),
-              note(Key, Y, InZone) ->
-                color(Key, Color),
+            ( col_index(Key, Col), note(Key, Y, InZone) ->
+                color(Key, Color), reset_color(Reset),
                 (InZone = true -> Sym = "*" ; Sym = "o"),
-                format("│~s ~w ~s", [Color, Sym, "\033[0m"])
+                format("│~s ~w ~s", [Color, Sym, Reset])
             ;
                 format("│   ")
             )
@@ -134,6 +115,7 @@ game_loop(Tick) :-
     draw_game,
     read_key(K),
     handle_input(K),
-    sleep(0.5),
+    flush_output,
+    sleep(0.18),
     T1 is Tick + 1,
     game_loop(T1).
