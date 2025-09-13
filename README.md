@@ -1,6 +1,6 @@
 # Terminal Hero 🎵🎮
 
-**Terminal Hero** é um jogo de ritmo simples feito em Haskell, inspirado em jogos como Guitar Hero, rodando diretamente no terminal com interface gráfica via `Gloss`.
+**Terminal Hero** é um jogo de ritmo simples feito em Prolog, inspirado em jogos como Guitar Hero, rodando diretamente no terminal.
 
 ---
 
