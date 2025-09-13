@@ -8,12 +8,16 @@ dificuldade(medio,  0.15, 3, 7,  -4).
 dificuldade(dificil, 0.10, 2, 5,  -5).
 
 altura_pista(19).
-zona_acerto_inicio(19).
+% --- MODIFICADO: O alcance do acerto foi aumentado ---
+zona_acerto_inicio(17). % Valor original era 19. Agora o jogador pode acertar mais cedo.
 zona_acerto_fim(22).
+combo_meta(5).
 
 :- dynamic note/3. 
 :- dynamic score/1.
 :- dynamic dificuldade_atual/1.
+:- dynamic combo_count/1.
+:- dynamic combo_total/1.
 
 % --- MENU PRINCIPAL ---
 play :-
@@ -101,7 +105,11 @@ start_game(Dificuldade) :-
     retractall(note(_,_,_)),
     retractall(score(_)),
     retractall(dificuldade_atual(_)),
+    retractall(combo_count(_)),
+    retractall(combo_total(_)),
     assertz(score(0)),
+    assertz(combo_count(0)),
+    assertz(combo_total(0)),
     assertz(dificuldade_atual(Dificuldade)),
     game_loop(0).
 
@@ -121,7 +129,7 @@ reset_color("\033[0m").
 
 spawn_note :-
     random_member(Key, [a,s,j,k]),
-    assertz(note(Key, 0, false)). % Começa fora da zona
+    assertz(note(Key, 0, false)).
 
 move_notes :-
     altura_pista(AlturaMax),
@@ -133,7 +141,6 @@ move_notes :-
         (
             Y1 is Y + 1,
             ( Y == AlturaMax -> update_score(erro_miss) ; true ),
-            % Determina se a nova posição está na zona de acerto
             ( between(InicioZona, FimZona, Y1) -> NewInZone = true ; NewInZone = false ),
             ( Y1 =< AlturaMax -> assertz(note(Key, Y1, NewInZone)) ; true)
         )
@@ -155,7 +162,7 @@ handle_input(Key) :-
         keysort(YsComZona, Sorted),
         reverse(Sorted, [MaxY-InZone | _]),
         
-        ( InZone == true -> % Verifica simplesmente se a nota está na zona
+        ( InZone == true ->
             once(retract(note(K, MaxY, _))),
             update_score(acerto)
         ;
@@ -170,7 +177,31 @@ update_score(Evento) :-
     S1 is S + Delta,
     retract(score(S)),
     assertz(score(S1)),
+    update_combo(Evento),
     check_game_over(S1).
+
+update_combo(acerto) :-
+    combo_meta(Meta),
+    retract(combo_count(C)),
+    C1 is C + 1,
+    ( C1 >= Meta ->
+        score(S),
+        S_bonus is S + C1,
+        retract(score(S)),
+        assertz(score(S_bonus)),
+        retract(combo_total(T)),
+        T1 is T + 1,
+        assertz(combo_total(T1)),
+        assertz(combo_count(0))
+    ;
+        assertz(combo_count(C1))
+    ).
+update_combo(erro_miss) :-
+    retractall(combo_count(_)),
+    assertz(combo_count(0)).
+update_combo(erro_apertar_cedo) :-
+    retractall(combo_count(_)),
+    assertz(combo_count(0)).
 
 score_change(acerto, D, Pontos) :-
     dificuldade(D, _, _, Pontos, _).
@@ -188,9 +219,12 @@ clear :- write('\e[2J\e[H').
 draw_game :-
     altura_pista(AlturaMax),
     score(S),
+    combo_count(C),
+    combo_total(T),
     dificuldade_atual(D),
     format("+---------------------+~n"),
-    format("| Score: ~|~` t~d~6+      |~n", [S]),
+    format("| Score: ~|~` t~d~10+   |~n", [S]),
+    format("| Combo: ~|~` t~dx (~d)~10+|~n", [C, T]),
     format("| Dificuldade: ~|~` t~w~6+ |~n", [D]),
     format("|     a   s   j   k   |~n"),
     format("|   ┌───┬───┬───┬───┐ |~n"),
@@ -201,13 +235,11 @@ draw_game :-
     format("|   └───┴───┴───┴───┘ |~n"),
     format("+---------------------+~n").
 
-% --- MODIFICADO ---
 draw_row(Y) :-
     forall(between(0, 3, Col),
         (
             ( col_index(Key, Col), note(Key, Y, InZone) ->
                 color(Key, Color), reset_color(Reset),
-                % Lógica de símbolo simplificada
                 ( InZone == true -> Sym = '*' ; Sym = 'o' ),
                 format("│~s ~w ~s", [Color, Sym, Reset])
             ;
