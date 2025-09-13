@@ -58,14 +58,6 @@ Agora você está pronto para jogar! Divirta-se.
 
 ---
 
-## 📚 Referências
-
-- [GHCup](https://www.haskell.org/ghcup/)
-- [Cabal](https://www.haskell.org/cabal/)
-- [Gloss](https://hackage.haskell.org/package/gloss)
-
----
-
 ### Docs com funcionalidades do projeto
 https://docs.google.com/document/d/1ur6RbqMDHaa-zNUNkXIWdY6Q51y-UFhaHQI1seneUY8/edit?tab=t.0
 
