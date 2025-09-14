@@ -25,7 +25,6 @@ play :-
     main_menu.
 
 main_menu :-
-    setup_terminal,
     clear,
     draw_title,
     format("~t~5+ ~n"),
@@ -35,15 +34,21 @@ main_menu :-
     read_menu_choice(Choice),
     handle_menu_choice(Choice).
 
-handle_menu_choice('1') :-
-    menu_dificuldade.
-handle_menu_choice('2') :-
-    format('~nSaindo do Terminal Hero...~n'),
-    halt.
-handle_menu_choice(_) :-
-    format('Opção inválida! Tente novamente.~n'),
-    sleep(1),
-    main_menu.
+handle_menu_choice(Choice) :-
+    ( Choice = '\n' ->
+        % Skip newline, read again
+        read_menu_choice(NewChoice),
+        handle_menu_choice(NewChoice)
+    ; Choice = '1' ->
+        menu_dificuldade
+    ; Choice = '2' ->
+        format('~nSaindo do Terminal Hero...~n'),
+        halt
+    ; 
+        format('Opção inválida! Tente novamente.~n'),
+        sleep(1),
+        main_menu
+    ).
 
 menu_dificuldade :-
     clear,
@@ -57,31 +62,28 @@ menu_dificuldade :-
     read_menu_choice(Choice),
     handle_difficulty_choice(Choice).
 
-handle_difficulty_choice('1') :- start_game(facil).
-handle_difficulty_choice('2') :- start_game(medio).
-handle_difficulty_choice('3') :- start_game(dificil).
-handle_difficulty_choice(_) :-
-    format('Opção inválida! Tente novamente.~n'),
-    sleep(1),
-    menu_dificuldade.
+handle_difficulty_choice(Choice) :-
+    ( Choice = '\n' ->
+        % Skip newline, read again
+        read_menu_choice(NewChoice),
+        handle_difficulty_choice(NewChoice)
+    ; Choice = '1' -> 
+        start_game(facil)
+    ; Choice = '2' -> 
+        start_game(medio)
+    ; Choice = '3' -> 
+        start_game(dificil)
+    ; 
+        format('Opção inválida! Tente novamente.~n'),
+        sleep(1),
+        menu_dificuldade
+    ).
 
 read_menu_choice(Choice) :-
+    % Force terminal restoration and ensure proper input mode
+    shell('stty icanon echo < /dev/tty'),
     flush_output,
-    read_line_to_codes(user_input, Codes),
-    filter_whitespace_codes(Codes, FilteredCodes),
-    handle_filtered_codes(FilteredCodes, Choice).
-
-filter_whitespace_codes(Codes, Filtered) :-
-    exclude(is_whitespace, Codes, Filtered).
-
-is_whitespace(10).
-is_whitespace(13).
-is_whitespace(32).
-is_whitespace(9).
-
-handle_filtered_codes([Code], Choice) :- !,
-    char_code(Choice, Code).
-handle_filtered_codes(_, 'invalid').
+    get_char(user_input, Choice).
 
 % --- TÍTULO ---
 draw_title :-
@@ -102,6 +104,7 @@ draw_title :-
 
 % --- LÓGICA PRINCIPAL DO JOGO ---
 start_game(Dificuldade) :-
+    setup_terminal,
     retractall(note(_,_,_)),
     retractall(score(_)),
     retractall(dificuldade_atual(_)),
