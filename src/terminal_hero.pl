@@ -1,6 +1,3 @@
-%% Main Terminal Hero game module
-%% Coordinates all game components and contains the main game loop
-
 :- module(terminal_hero, [
     play/0,
     start_game/1,
@@ -13,18 +10,15 @@
 :- use_module(display).
 :- use_module(menu).
 
-%% Main entry point
 play :-
     at_halt(input_handler:restore_terminal(0)),
     menu:main_menu.
 
-%% Start a new game with specified difficulty
 start_game(Dificuldade) :-
     input_handler:setup_terminal,
     game_state:init_game_state(Dificuldade),
     game_loop(0).
 
-%% Main game loop
 game_loop(Tick) :-
     game_state:get_difficulty(Dificuldade),
     game_config:dificuldade(Dificuldade, SleepTime, SpawnRate, _, _),

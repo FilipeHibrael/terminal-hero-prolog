@@ -8,8 +8,8 @@ dificuldade(medio,  0.15, 3, 7,  -4).
 dificuldade(dificil, 0.10, 2, 5,  -5).
 
 altura_pista(19).
-% --- MODIFICADO: O alcance do acerto foi aumentado ---
-zona_acerto_inicio(17). % Valor original era 19. Agora o jogador pode acertar mais cedo.
+
+zona_acerto_inicio(17). 
 zona_acerto_fim(22).
 combo_meta(5).
 

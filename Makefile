@@ -1,5 +1,4 @@
 # Terminal Hero Makefile
-# Provides convenient commands for building and running the game
 
 .PHONY: run test clean help
 

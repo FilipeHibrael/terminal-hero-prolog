@@ -144,8 +144,6 @@ Agora você está pronto para jogar! Divirta-se.
 
 ## 🕹️ Controles (Exemplo)
 
-> (Dependente de como o jogo foi implementado)
-
 - Teclas: `A`, `S`, `J`, `K` para acertar as notas.
 - Pontuação é mostrada no canto superior da interface.
 - Notas caem de cima e devem ser pressionadas no tempo certo.

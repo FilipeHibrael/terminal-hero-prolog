@@ -1,6 +1,3 @@
-%% Menu system module
-%% Handles main menu and difficulty selection
-
 :- module(menu, [
     main_menu/0,
     menu_dificuldade/0
@@ -11,7 +8,6 @@
 :- use_module(display).
 :- use_module(terminal_hero).
 
-%% Main menu display and handling
 main_menu :-
     display:clear,
     title:draw_title,
@@ -22,10 +18,8 @@ main_menu :-
     input_handler:read_menu_choice(Choice),
     handle_menu_choice(Choice).
 
-%% Handle main menu choices
 handle_menu_choice(Choice) :-
     ( Choice = '\n' ->
-        % Skip newline, read again
         input_handler:read_menu_choice(NewChoice),
         handle_menu_choice(NewChoice)
     ; Choice = '1' ->
@@ -39,7 +33,6 @@ handle_menu_choice(Choice) :-
         main_menu
     ).
 
-%% Difficulty selection menu
 menu_dificuldade :-
     display:clear,
     title:draw_title,

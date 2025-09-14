@@ -1,6 +1,3 @@
-%% Display and rendering module
-%% Handles all game visual output
-
 :- module(display, [
     clear/0,
     draw_game/0,
@@ -11,10 +8,9 @@
 :- use_module(game_config).
 :- use_module(game_state).
 
-%% Clear screen
-clear :- write('\e[2J\e[H').
+clear :-
+    write('\e[2J\e[H').
 
-%% Draw the main game screen
 draw_game :-
     game_config:altura_pista(AlturaMax),
     game_state:get_score(S),
@@ -33,7 +29,6 @@ draw_game :-
     format("|   └───┴───┴───┴───┘ |~n"),
     format("+---------------------+~n").
 
-%% Draw a single row of the game field
 draw_row(Y) :-
     forall(between(0, 3, Col),
         (
@@ -48,7 +43,6 @@ draw_row(Y) :-
     ),
     format("│").
 
-%% Check for game over conditions
 check_game_over(S) :-
     ( S >= 100 -> 
         format("~n🎸 Você venceu, YOU ROCK!~n"), 

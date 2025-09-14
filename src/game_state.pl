@@ -1,6 +1,3 @@
-%% Game state management
-%% Handles all dynamic game state including score, notes, and combos
-
 :- module(game_state, [
     init_game_state/1,
     cleanup_game_state/0,
@@ -21,14 +18,12 @@
 :- use_module(library(random)).
 :- use_module(library(lists)).
 
-%% Dynamic predicates for game state
-:- dynamic note/3.          % note(Key, Y_Position, InZone)
-:- dynamic score/1.         % score(CurrentScore)
-:- dynamic dificuldade_atual/1.  % dificuldade_atual(Difficulty)
-:- dynamic combo_count/1.   % combo_count(CurrentCombo)
-:- dynamic combo_total/1.   % combo_total(TotalCombos)
+:- dynamic note/3.
+:- dynamic score/1.
+:- dynamic dificuldade_atual/1.
+:- dynamic combo_count/1.
+:- dynamic combo_total/1.
 
-%% Initialize game state for a new game
 init_game_state(Dificuldade) :-
     cleanup_game_state,
     assertz(score(0)),
@@ -36,7 +31,6 @@ init_game_state(Dificuldade) :-
     assertz(combo_total(0)),
     assertz(dificuldade_atual(Dificuldade)).
 
-%% Clean up all dynamic predicates
 cleanup_game_state :-
     retractall(note(_,_,_)),
     retractall(score(_)),
@@ -44,12 +38,10 @@ cleanup_game_state :-
     retractall(combo_count(_)),
     retractall(combo_total(_)).
 
-%% Spawn a new note at the top
 spawn_note :-
     random_member(Key, [a,s,j,k]),
     assertz(note(Key, 0, false)).
 
-%% Move all notes down one position
 move_notes :-
     game_config:altura_pista(AlturaMax),
     game_config:zona_acerto_inicio(InicioZona),
@@ -65,7 +57,6 @@ move_notes :-
         )
     ).
 
-%% Update score based on events
 update_score(Evento) :-
     dificuldade_atual(D),
     score(S),
@@ -75,14 +66,12 @@ update_score(Evento) :-
     assertz(score(S1)),
     update_combo(Evento).
 
-%% Calculate score changes based on events
 score_change(acerto, D, Pontos) :-
     game_config:dificuldade(D, _, _, Pontos, _).
 score_change(erro_miss, D, Pontos) :-
     game_config:dificuldade(D, _, _, _, Pontos).
 score_change(erro_apertar_cedo, _, -1).
 
-%% Update combo counter
 update_combo(acerto) :-
     game_config:combo_meta(Meta),
     retract(combo_count(C)),
@@ -106,7 +95,6 @@ update_combo(erro_apertar_cedo) :-
     retractall(combo_count(_)),
     assertz(combo_count(0)).
 
-%% Getters for game state
 get_score(S) :- score(S).
 get_combo_info(C, T) :- combo_count(C), combo_total(T).
 get_difficulty(D) :- dificuldade_atual(D).
