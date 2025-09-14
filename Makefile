@@ -13,12 +13,12 @@ help:
 # Run the main game
 run:
 	@echo "Starting Terminal Hero..."
-	swipl -g main -t halt app/main.pl
+	swipl -q -g "consult('app/main.pl'), main." -t halt
 
 # Run the test suite
 test:
 	@echo "Running test suite..."
-	swipl -g run_tests -t halt tests/tests.pl
+	swipl -q -g "consult('tests/tests.pl'), run_all_tests." -t halt
 
 # Clean compiled files (if any)
 clean:

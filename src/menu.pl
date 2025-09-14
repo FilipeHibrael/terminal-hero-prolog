@@ -50,10 +50,13 @@ handle_difficulty_choice(Choice) :-
         input_handler:read_menu_choice(NewChoice),
         handle_difficulty_choice(NewChoice)
     ; Choice = '1' -> 
+        get_char(_), % Consume newline
         terminal_hero:start_game(easy)
     ; Choice = '2' -> 
+        get_char(_), % Consume newline
         terminal_hero:start_game(medium)
     ; Choice = '3' -> 
+        get_char(_), % Consume newline
         terminal_hero:start_game(hard)
     ; 
         format('Opção inválida! Tente novamente.~n'),

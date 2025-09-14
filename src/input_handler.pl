@@ -3,12 +3,10 @@
     restore_terminal/1,
     read_key/1,
     read_menu_choice/1,
-    handle_input/1
+    flush_input/0
 ]).
 
-:- use_module(game_state).
 :- use_module(library(process)).
-:- use_module(library(lists)).
 :- use_module(library(readutil)).
 
 setup_terminal :-
@@ -32,19 +30,5 @@ read_menu_choice(Choice) :-
     flush_output,
     get_char(user_input, Choice).
 
-handle_input(none) :- !.
-handle_input(Key) :-
-    downcase_atom(Key, K),
-    findall(Y-InZone, game_state:note(K, Y, InZone), NotesWithZone),
-    ( NotesWithZone = [] -> true
-    ;
-        keysort(NotesWithZone, Sorted),
-        reverse(Sorted, [MaxY-InZone | _]),
-        
-        ( InZone == true ->
-            once(retract(game_state:note(K, MaxY, _))),
-            game_state:update_score(hit)
-        ;
-            game_state:update_score(early_press_error)
-        )
-    ).
+flush_input :-
+    read_pending_chars(user_input, _, _).

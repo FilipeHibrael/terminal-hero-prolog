@@ -15,17 +15,17 @@ Este projeto agora possui uma arquitetura modular baseada na estrutura de projet
 ├── src/
 │   ├── assets/
 │   │   └── title.pl         # Gráficos ASCII e título
-│   ├── game_config.pl       # Configurações e constantes do jogo
-│   ├── game_state.pl        # Gerenciamento de estado do jogo
-│   ├── input_handler.pl     # Manipulação de entrada do teclado
 │   ├── display.pl           # Sistema de renderização
+│   ├── game_config.pl       # Configurações e constantes do jogo
+│   ├── input_handler.pl     # Manipulação de entrada do teclado
 │   ├── menu.pl             # Sistema de menus
+│   ├── pure_game_logic.pl   # Lógica pura do jogo
 │   └── terminal_hero.pl     # Módulo principal do jogo
 ├── tests/
-│   └── tests.pl            # Suíte de testes
+│   └── tests.pl            # Suíte completa de testes
 ├── Makefile                # Comandos de build e execução
-├── README.md               # Este arquivo
-└── terminal-hero.pl        # Versão monolítica original (compatibilidade)
+├── LICENSE                 # Licença do projeto
+└── README.md               # Este arquivo
 ```
 
 ---
@@ -80,11 +80,8 @@ make help
 Navegue até o diretório do projeto e execute:
 
 ```bash
-# Versão modular
-swipl -g main -t halt app/main.pl
-
-# Versão original (compatibilidade)
-swipl -g play -t halt terminal-hero.pl
+# Executar o jogo
+swipl -q -g "consult('app/main.pl'), main." -t halt
 ```
 
 ### Execução Interativa
