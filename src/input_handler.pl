@@ -35,16 +35,16 @@ read_menu_choice(Choice) :-
 handle_input(none) :- !.
 handle_input(Key) :-
     downcase_atom(Key, K),
-    findall(Y-InZone, game_state:note(K, Y, InZone), YsComZona),
-    ( YsComZona = [] -> true
+    findall(Y-InZone, game_state:note(K, Y, InZone), NotesWithZone),
+    ( NotesWithZone = [] -> true
     ;
-        keysort(YsComZona, Sorted),
+        keysort(NotesWithZone, Sorted),
         reverse(Sorted, [MaxY-InZone | _]),
         
         ( InZone == true ->
             once(retract(game_state:note(K, MaxY, _))),
-            game_state:update_score(acerto)
+            game_state:update_score(hit)
         ;
-            game_state:update_score(erro_apertar_cedo)
+            game_state:update_score(early_press_error)
         )
     ).

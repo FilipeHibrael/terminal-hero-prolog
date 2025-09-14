@@ -12,7 +12,7 @@ clear :-
     write('\e[2J\e[H').
 
 draw_game :-
-    game_config:altura_pista(AlturaMax),
+    game_config:field_height(MaxHeight),
     game_state:get_score(S),
     game_state:get_combo_info(C, T),
     game_state:get_difficulty(D),
@@ -22,7 +22,7 @@ draw_game :-
     format("| Dificuldade: ~|~` t~w~6+ |~n", [D]),
     format("|     a   s   j   k   |~n"),
     format("|   ┌───┬───┬───┬───┐ |~n"),
-    forall(between(0, AlturaMax, Y),
+    forall(between(0, MaxHeight, Y),
         ( format("|   "), draw_row(Y), format(" |~n") )
     ),
     format("|   │===│===│===│===│ |~n"),

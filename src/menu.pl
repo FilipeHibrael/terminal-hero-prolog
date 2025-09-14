@@ -1,6 +1,6 @@
 :- module(menu, [
     main_menu/0,
-    menu_dificuldade/0
+    difficulty_menu/0
 ]).
 
 :- use_module('assets/title').
@@ -23,7 +23,7 @@ handle_menu_choice(Choice) :-
         input_handler:read_menu_choice(NewChoice),
         handle_menu_choice(NewChoice)
     ; Choice = '1' ->
-        menu_dificuldade
+        difficulty_menu
     ; Choice = '2' ->
         format('~nSaindo do Terminal Hero...~n'),
         halt
@@ -33,7 +33,7 @@ handle_menu_choice(Choice) :-
         main_menu
     ).
 
-menu_dificuldade :-
+difficulty_menu :-
     display:clear,
     title:draw_title,
     format("~t~5+ ~n"),
@@ -45,20 +45,18 @@ menu_dificuldade :-
     input_handler:read_menu_choice(Choice),
     handle_difficulty_choice(Choice).
 
-%% Handle difficulty choices
 handle_difficulty_choice(Choice) :-
     ( Choice = '\n' ->
-        % Skip newline, read again
         input_handler:read_menu_choice(NewChoice),
         handle_difficulty_choice(NewChoice)
     ; Choice = '1' -> 
-        terminal_hero:start_game(facil)
+        terminal_hero:start_game(easy)
     ; Choice = '2' -> 
-        terminal_hero:start_game(medio)
+        terminal_hero:start_game(medium)
     ; Choice = '3' -> 
-        terminal_hero:start_game(dificil)
+        terminal_hero:start_game(hard)
     ; 
         format('Opção inválida! Tente novamente.~n'),
         sleep(1),
-        menu_dificuldade
+        difficulty_menu
     ).

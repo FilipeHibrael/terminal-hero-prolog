@@ -5,20 +5,18 @@
 :- use_module('../src/game_state').
 :- use_module('../src/display').
 
-%% Test game configuration
 test_game_config :-
     format('Testing game configuration...~n'),
-    game_config:dificuldade(facil, Sleep, Spawn, Points, Miss),
-    format('Facil difficulty: Sleep=~w, Spawn=~w, Points=~w, Miss=~w~n', 
+    game_config:difficulty(easy, Sleep, Spawn, Points, Miss),
+    format('Easy difficulty: Sleep=~w, Spawn=~w, Points=~w, Miss=~w~n', 
            [Sleep, Spawn, Points, Miss]),
-    game_config:altura_pista(Height),
+    game_config:field_height(Height),
     format('Field height: ~w~n', [Height]),
     format('Game config tests passed!~n~n').
 
-%% Test game state initialization
 test_game_state :-
     format('Testing game state...~n'),
-    game_state:init_game_state(facil),
+    game_state:init_game_state(easy),
     game_state:get_score(S),
     format('Initial score: ~w~n', [S]),
     game_state:get_combo_info(C, T),
@@ -28,25 +26,23 @@ test_game_state :-
     game_state:cleanup_game_state,
     format('Game state tests passed!~n~n').
 
-%% Test score updates
 test_score_updates :-
     format('Testing score updates...~n'),
-    game_state:init_game_state(facil),
+    game_state:init_game_state(easy),
     game_state:get_score(S1),
     format('Score before hit: ~w~n', [S1]),
-    game_state:update_score(acerto),
+    game_state:update_score(hit),
     game_state:get_score(S2),
     format('Score after hit: ~w~n', [S2]),
-    game_state:update_score(erro_miss),
+    game_state:update_score(miss_error),
     game_state:get_score(S3),
     format('Score after miss: ~w~n', [S3]),
     game_state:cleanup_game_state,
     format('Score update tests passed!~n~n').
 
-%% Test note spawning and movement
 test_notes :-
     format('Testing note mechanics...~n'),
-    game_state:init_game_state(medio),
+    game_state:init_game_state(medium),
     game_state:spawn_note,
     findall(Key-Y, game_state:note(Key, Y, _), Notes1),
     format('Notes after spawn: ~w~n', [Notes1]),

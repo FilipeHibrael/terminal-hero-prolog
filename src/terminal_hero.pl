@@ -14,14 +14,14 @@ play :-
     at_halt(input_handler:restore_terminal(0)),
     menu:main_menu.
 
-start_game(Dificuldade) :-
+start_game(Difficulty) :-
     input_handler:setup_terminal,
-    game_state:init_game_state(Dificuldade),
+    game_state:init_game_state(Difficulty),
     game_loop(0).
 
 game_loop(Tick) :-
-    game_state:get_difficulty(Dificuldade),
-    game_config:dificuldade(Dificuldade, SleepTime, SpawnRate, _, _),
+    game_state:get_difficulty(Difficulty),
+    game_config:difficulty(Difficulty, SleepTime, SpawnRate, _, _),
     display:clear,
     game_state:move_notes,
     (Tick mod SpawnRate =:= 0 -> game_state:spawn_note ; true),
